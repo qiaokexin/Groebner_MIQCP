@@ -96,45 +96,45 @@ def MDS_module(m, t, var, con, deg, g, h, bse, equ, index): # constraints for MD
 
     # add constraints
 
-    # 引入了变量，则该分支确定
+    # If a variable is introduced, the branch determines
     m.addConstrs((var[i] == 1) >> (g[i] == 1) for i in range(2*t))
-    # 引入了常数，则该分支确定
+    # If a constant is introduced, the branch determines
     m.addConstrs((con[i] == 1) >> (g[i] ==1) for i in range(2*t))
-    # 添加sum_con <=t
+    # add sum_con <=t
     m.addConstr(sum_con <= t)
-    # 基只能从消耗自由度的状态中选取(没必要，h的取值已经保证了这一点)
+    #The base can only be chosen from states that consume degrees of freedom (non-essential, the value of h already guarantees this)
     #m.addConstrs(bse[i] <= g[i] for i in range(2*t))
-    # h 在数值上等于 g - bse
+    #h is numerically equal to g - bse
     m.addConstrs(h[i] == g[i] - bse[i] for i in range(2*t))
-    # 基中有t个分支
+    # There are t branches in the base
     m.addConstr(sum(bse[i] for i in range(2 * t)) == t)
-    # 未选入基的分支的次数应该大于等于基的次数
+    # The number of branches not selected into the base should be greater than or equal to the number of base
     m.addConstrs((h[i] == 1) >> (max_bseTdeg <= deg[i]) for i in range(2*t))
-    # 添加的方程次数之和
+    # Sum of the number of equations added
     m.addLConstr(equ == sum(hTdeg[i] for i in range(2*t)))
     # if a branch is not determined, it should be expressed by basis
     m.addConstrs((g[i] == 0) >> (deg[i] == max_bseTdeg) for i in range(2*t))
 
-    # indicator constraints 条件必须是一个binary变量==0或1
+    # indicator constraints condition must be a binary variable == 0 or 1
     m.addConstr((bin_max_bseTdeg == 1) >> (sum_con == t))
     m.update()
     return bseTdeg, max_bseTdeg, hTdeg
 
 
-def taddition_module(m, t, var, con, deg, g, h, bse, equ, index): # 定义t-additon模块约束
-    # index: 名字，包含轮数、位置和模块名称
+def taddition_module(m, t, var, con, deg, g, h, bse, equ, index): # Defining t-additon module constraints
+    # index: name with number of rounds, position and module name
     assert(len(var) == t)
 
-    # 添加辅助变量
-    # bseTdeg 为 bse 与 deg 的乘积
+    # Adding auxiliary variables
+    # bseTdeg is the product of bse and deg.
     bseTdeg = m.addVars( t, lb = 0, vtype = GRB.INTEGER, name = "bseTdeg_" + index)
-    # max_bseTdeg 为仿射层基的次数
+    # max_bseTdeg is the number of affine layer bases
     max_bseTdeg = m.addVar(lb=0, vtype=GRB.INTEGER, name="max_bseTdeg_" + index)
-    # hTdeg 为 h 与 deg 的乘积
+    # hTdeg is the product of h and deg
     hTdeg = m.addVars(t, lb=0, vtype=GRB.INTEGER, name="hTdeg_" + index)
-    # 添加sum_con
+    # Add sum_con
     sum_con = m.addVar(lb=0, vtype=GRB.INTEGER, name="sum_con_" + index)
-    # 添加bin_max_bseTdeg
+    # Add bin_max_bseTdeg
     bin_max_bseTdeg = m.addVar(lb=0, ub=1, vtype=GRB.BINARY, name="bin_max_bseTdeg_" + index)
     m.update()
 
@@ -151,54 +151,54 @@ def taddition_module(m, t, var, con, deg, g, h, bse, equ, index): # 定义t-addi
     for i in range(t):
         m.addQConstr(hTdeg[i] == h[i] * deg[i] )
 
-    # 添加约束
-    # 引入了变量，则该分支确定
+    # Adding Constraints
+    # variable is introduced, the branch determines
     m.addConstrs((var[i] == 1) >> (g[i] == 1) for i in range(t))
-    # 引入了常数，则该分支确定
+    # constant is introduced, the branch determines
     m.addConstrs((con[i] == 1) >> (g[i] ==1) for i in range(t))
-    # 添加sum_con <=t
+    # Add sum_con <= t
     m.addConstr(sum_con <= t - 1)
-    # 基只能从消耗自由度的状态中选取
+    # The base can only be selected from states that consume degrees of freedom
     #m.addConstrs(bse[i] <= g[i] for i in range(t))
-    # h 在数值上等于 g - bse
+    # h is numerically equal to g - bse
     m.addConstrs(h[i] == g[i] - bse[i] for i in range(t))
-    # 基中有t-1个分支
+    # There are t-1 branches in the base
     m.addConstr(sum(bse[i] for i in range(t)) == t-1)
-    # 未选入基的分支的次数应该大于等于基的次数 
+    # The number of branches not selected into the base should be greater than or equal to the number of base 
     m.addConstrs((h[i] == 1) >> (max_bseTdeg <= deg[i]) for i in range(t))
-    # 添加的方程次数之和
+    # Sum of the number of equations added
     m.addConstr(equ == sum(hTdeg[i] for i in range(t)))
     # if a branch is not determined, it should be expressed by basis
     m.addConstrs((g[i] == 0) >> (deg[i] == max_bseTdeg) for i in range(t))
 
-    # indicator constraints 条件必须是一个binary变量==0或1
+    # indicator constraints condition must be a binary variable == 0 or 1
     m.addConstr((bin_max_bseTdeg == 1) >> (sum_con == t-1))
     m.update()
     return bseTdeg, max_bseTdeg, hTdeg
 
-def NLUP_module(m, var, con, deg, equ, index, alpha): # 单变量非线性模块
-    # var: 输入输出变量, var[0]是上游，var[1]是下游。 con, deg也是
-    # index: 名字，包含轮数、位置和模块名称
+def NLUP_module(m, var, con, deg, equ, index, alpha): # Univariate nonlinear modules
+    # var: input and output variables, var[0] is upstream, var[1] is downstream. con, deg are also
+    # index: name with number of rounds, position and module name
     assert(len(var) == 2)
-    # 添加约束
-    # 若常量在下游位置，则其上游状态仍为常量，反之亦然
+    # Adding Constraints
+    # If the constant is in the downstream position, its upstream state remains constant and vice versa
     m.addConstr((con[0] == 1) >> (con[1] == 1))
     m.addConstr((con[1] == 1) >> (con[0] == 1))
-    # 下游引入变量，则引入方程
+    # Introducing variables downstream introduces the equation
     m.addConstr((var[1]==1) >> (equ == alpha * deg[0]))
-    # 下游不引入变量，则由上游表达
+    # No variables are introduced downstream, then the expression from upstream
     m.addConstr((var[1]==0) >> (deg[1] == alpha * deg[0]))
     m.addConstr((var[1]==0) >> (equ == 0))
     m.update()
     
-def NLMP_module(m, deg_in, var_out, con_out, deg_out, equ, index, alpha):# 非线性多变元多项式约束
+def NLMP_module(m, deg_in, var_out, con_out, deg_out, equ, index, alpha):# Nonlinear multivariate polynomial constraints
     # m: model
     # var_in, ... g_in: input variables
     # var_out, ... g_out: output variables
-    # index：名字，包含轮数、位置和模块名称
-    # alpha: 多项式次数
+    # index: name with number of rounds, position and module name
+    # alpha: number of polynomials
     
-    # 添加辅助变量
+    # Adding auxiliary variables
     max_deg_in = m.addVar(lb = 0, vtype = GRB.INTEGER, name = "max_deg_in" + index)
     varPcon_out = m.addVar(lb=0, ub=1, vtype=GRB.BINARY, name="varPcon_out_" + index)
     m.update()
@@ -207,41 +207,41 @@ def NLMP_module(m, deg_in, var_out, con_out, deg_out, equ, index, alpha):# 非�
 
     m.addConstr(varPcon_out == var_out + con_out)
 
-    # 添加约束
+    # Adding Constraints
     
-    # 下游引入变量，则添加方程
+    # Introducing variables downstream adds the equation
     m.addConstr((var_out == 1) >> (equ == alpha * max_deg_in))
 
-    # 下游为常数，则引入方程
+    # downstream is a constant, the equation is introduced
     m.addConstr((con_out == 1) >> (equ == alpha * max_deg_in))
-    # 下游不引入变量且非常数，则由上游表达    
+    # The downstream does not introduce variables and is non-constant, it is expressed by the upstream    
     m.addConstr((varPcon_out == 0) >> (deg_out == alpha * max_deg_in))
     m.addConstr((varPcon_out == 0) >> (equ == 0))
     m.update()
     return max_deg_in, varPcon_out
     
 
-def multiplication_module(m, deg_in, var_out, con_out, deg_out, equ, index):# 乘法模块约束
+def multiplication_module(m, deg_in, var_out, con_out, deg_out, equ, index):# Multiplication Module Constraints
     # m: model
     # var_in, ... g_in: input variables
     # var_out, ... g_out: output variables
-    # index：名字，包含轮数、位置和模块名称
-    # alpha: 多项式次数
+    # index: name with number of rounds, position and module name
+    # alpha: number of polynomials
     assert(len(deg_in) == 2)
     
-    # 添加辅助变量
+    # Adding auxiliary variables
     varPcon_out = m.addVar(lb = 0, ub = 1, vtype = GRB.BINARY, name = "varPcon_out_" + index)
     m.update()
     m.addConstr(varPcon_out == var_out + con_out)
 
-    # 添加约束
+    # Adding Constraints
     
-    # 下游引入变量，则添加方程
+    # Introducing variables downstream adds the equation
     m.addConstr((var_out == 1) >> (equ == deg_in[0] + deg_in[1]))
 
-    # 下游为常数，则引入方程
+    # downstream is a constant, the equation is introduced
     m.addConstr((con_out == 1) >> (equ == deg_in[0] + deg_in[1]))
-    # 下游不引入变量且非常数，则由上游表达    
+    # The downstream does not introduce variables and is non-constant, it is expressed by the upstream    
     m.addConstr((varPcon_out == 0) >> (deg_out == deg_in[0] + deg_in[1]))
     m.addConstr((varPcon_out == 0) >> (equ == 0))
     m.update()
@@ -256,19 +256,19 @@ def down_up(m, var, con, deg):
     common_constraints(m, var, con, deg)
 
 def down_pending(m, var, con, g, deg, index):
-    # 添加辅助变量
+    # Adding auxiliary variables
     varPcon = m.addVar(lb = 0, ub = 1, vtype = GRB.BINARY, name = "varPcon_" + index)
     m.update()
     m.addConstr(varPcon == var + con)
 
-    # 添加约束
+    # Adding Constraints
     m.addConstr((varPcon == 0) >> (g==1))
     common_constraints(m, var, con, deg)
     m.update()
     return varPcon
 
 def down_pending_pending(m, g1, deg1, g2, deg2, var, con, deg, equ, index):
-    # 添加辅助变量
+    # Adding auxiliary variables
     #g1Pg2 = m.addVar(lb = 0, ub = 2, vtype = GRB.INTEGER, name = "g1Pg2_" + index)
     BIN_g1Pg2eq2 = m.addVar(lb=0, ub=1, vtype=GRB.BINARY, name="BIN_g1Pg2eq2_" + index)
     BIN_g1Pg2eq1 = m.addVar(lb=0, ub=1, vtype=GRB.BINARY, name="BIN_g1Pg2eq1_" + index)
@@ -303,7 +303,7 @@ def down_pending_pending(m, g1, deg1, g2, deg2, var, con, deg, equ, index):
 
     
     
-    # 添加约束
+    # Adding Constraints
     #g1 + g2 = 2 
     m.addConstr((BIN_g1Pg2eq2 == 1) >> (deg1 == deg) )
     m.addConstr((BIN_g1Pg2eq2 == 1) >> (deg2 == deg) )
@@ -314,7 +314,7 @@ def down_pending_pending(m, g1, deg1, g2, deg2, var, con, deg, equ, index):
     m.addConstr((BIN_g1Pg2eq1 == 1) >> (deg1 + deg2 + deg - max_deg == 2 * min_deg))
     m.addConstr((BIN_g1Pg2eq1 == 1) >> (equ == max_deg))
 
-    # 共有约束
+    # communal restraint
     common_constraints(m, var, con, deg)
     common_constraints(m, var, con, deg1)
     common_constraints(m, var, con, deg2)
@@ -322,22 +322,22 @@ def down_pending_pending(m, g1, deg1, g2, deg2, var, con, deg, equ, index):
     m.update()
     
 def pending_up(m, var, con, g, deg, index):
-    # 添加辅助变量
+    # Adding auxiliary variables
     varPcon = m.addVar(lb = 0, ub = 1, vtype = GRB.BINARY, name = "varPcon_" + index)
     m.update()
     m.addConstr(varPcon == var + con)
 
-    # 添加约束
+    # Adding Constraints
     m.addConstr((varPcon == 0) >> (g == 0))
 
-    # 共有约束
+    # communal restraint
     common_constraints(m, var, con, deg)
     m.update()
     return varPcon
     
 
 def down_pending_ups(m, deg_d, deg_p, g, deg_us, var, con, equ, index):
-    # 添加辅助变量
+    # Adding auxiliary variables
    
     min_deg_dp = m.addVar(lb=0, vtype=GRB.INTEGER, name="min_degdp_" + index)
 
@@ -348,7 +348,7 @@ def down_pending_ups(m, deg_d, deg_p, g, deg_us, var, con, equ, index):
 
     m.addGenConstrMin(min_deg_dp, [deg_d, deg_p])
 
-    # 添加约束，按 g 划分
+    # Add constraints, organized by g
     m.addConstr((g ==1) >> (deg_p == deg_d))
     m.addConstr((g ==0) >> (equ == deg_d +deg_p - min_deg_dp))
    
@@ -361,7 +361,7 @@ def down_pending_ups(m, deg_d, deg_p, g, deg_us, var, con, equ, index):
     return min_deg_dp
     
 def pending_pending(m, deg1, deg2, g1, g2, var, con, equ, index):
-    # 添加辅助变量
+    # Adding auxiliary variables
     varPcon = m.addVar(lb=0, ub=1, vtype=GRB.BINARY, name="varPcon_" + index)
     BIN_g1Pg2eq1 = m.addVar(lb=0, ub=1, vtype=GRB.BINARY, name="BIN_g1Pg2eq1_" + index)
     BIN_g1Pg2eq0 = m.addVar(lb=0, ub=1, vtype=GRB.BINARY, name="BIN_g1Pg2eq0_" + index)
@@ -384,14 +384,14 @@ def pending_pending(m, deg1, deg2, g1, g2, var, con, equ, index):
 
     m.addGenConstrMax(max_deg, [deg1, deg2])
     
-    # 添加约束
+    # Adding Constraints
     m.addConstr((varPcon == 0) >> (g1 + g2 <= 1))
     m.addConstr((BIN_g1Pg2eq1 == 1) >> (deg1 == deg2) )
     m.addConstr((BIN_g1Pg2eq1 == 1) >> (equ == 0))
 
     m.addConstr((BIN_g1Pg2eq0 == 1) >> (equ == max_deg))
 
-    # 共有约束
+    # communal restraint
     common_constraints(m, var, con, deg1)
     common_constraints(m, var, con, deg2)
     m.update()
@@ -401,7 +401,7 @@ def pending_pending(m, deg1, deg2, g1, g2, var, con, equ, index):
 
 
 def pending_pending_up(m, deg1, deg2, g1, g2, var, con, deg, equ, index):
-    # 添加辅助变量
+    # Adding auxiliary variables
     min_deg = m.addVar(lb=0, vtype=GRB.INTEGER, name="min_deg_" + index)
     m.update()
 
@@ -409,12 +409,12 @@ def pending_pending_up(m, deg1, deg2, g1, g2, var, con, deg, equ, index):
 
     m.addGenConstrMin(min_deg, [deg1, deg2])
 
-    # 添加约束
+    # Adding Constraints
     pending_pending(m, deg1, deg2, g1, g2, var, con, equ, index)
 
     m.addConstr(deg == min_deg)
 
-    # 共有约束
+    # communal restraint
     common_constraints(m, var, con, deg)
 
     m.update()
@@ -424,7 +424,7 @@ def pending_pending_up(m, deg1, deg2, g1, g2, var, con, deg, equ, index):
 
 
 def pending_pending_pending(m, deg1, deg2, deg3, g1, g2, g3, var, con, equ, index):
-    # 添加辅助变量
+    # Adding auxiliary variables
   
     varPcon = m.addVar(lb=0, ub=1, vtype=GRB.BINARY, name="varPcon_" + index)
     BIN_sumg0 = m.addVar(lb = 0, ub = 1, vtype = GRB.BINARY, name = "BIN_sumg0_" + index)
@@ -466,7 +466,7 @@ def pending_pending_pending(m, deg1, deg2, deg3, g1, g2, g3, var, con, equ, inde
 
     
 
-    # 添加约束
+    # Adding Constraints
     m.addConstr((varPcon == 0) >> (g1 + g2 + g3 <= 2))
     # g1 + g2 + g3 = 2.
     m.addConstr((BIN_sumg2 == 1) >> (deg1 == deg2))
@@ -480,7 +480,7 @@ def pending_pending_pending(m, deg1, deg2, deg3, g1, g2, g3, var, con, equ, inde
     # g1 + g2 + g3 = 0.
     m.addConstr((BIN_sumg0 == 1) >> (equ == deg1 + deg2 + deg3 - min_deg))
 
-    # 共有约束
+    # communal restraint
     common_constraints(m, var, con, deg1)
     common_constraints(m, var, con, deg2)
     common_constraints(m, var, con, deg3)
@@ -492,10 +492,10 @@ def pending_pending_pending_up(m, deg1, deg2, deg3, g1, g2, g3, var, con, equ, d
 
     min_deg = pending_pending_pending(m, deg1, deg2, deg3, g1, g2, g3, var, con, equ, index)
 
-    #upstream的次数是三个pending中最小的那个
+    #The upstream count is the smallest of the three pending
     m.addLConstr(deg == min_deg)
 
-    # 共有约束
+    # communal restraint
     common_constraints(m, var, con, deg)
 
     m.update()
