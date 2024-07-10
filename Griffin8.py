@@ -1,8 +1,8 @@
 from util4Groebner import *
 from math import comb, log2
 
-t = 8 #分支数
-d = 5 #S盒次数
+t = 8 #Number of branches
+d = 5 #Number of S-boxes
 
 def Griffin4_initM_model(m, t, var_in, con_in ,deg_in, g_in,h_in, bse_in):
     var_out = {}
@@ -11,7 +11,7 @@ def Griffin4_initM_model(m, t, var_in, con_in ,deg_in, g_in,h_in, bse_in):
     g_out = {}
     h_out = {}
     bse_out = {}
-    # 添加输出变量
+    # Adding Output Variables
     for i in range(t):
         var_out[i] = m.addVar(lb=0, ub=1, vtype=GRB.BINARY, name="var_0r_{}".format(i))
         con_out[i] = m.addVar(lb=0, ub=1, vtype=GRB.BINARY, name="con_0r_{}".format(i))
@@ -23,7 +23,7 @@ def Griffin4_initM_model(m, t, var_in, con_in ,deg_in, g_in,h_in, bse_in):
     equ_M = m.addVar(lb=0, vtype = GRB.INTEGER, name="equMDS_-1r")
     m.update()
 
-    # MDS 约束
+    # MDS constraints
     MDS_module(m, t, [var_in[0], var_in[1], var_in[2], var_in[3],var_in[4], var_in[5], var_in[6], var_in[7], var_out[0], var_out[1], var_out[2], var_out[3],var_out[4], var_out[5], var_out[6], var_out[7],], \
                [con_in[0], con_in[1], con_in[2], con_in[3],con_in[4], con_in[5], con_in[6], con_in[7], con_out[0], con_out[1], con_out[2], con_out[3],con_out[4], con_out[5], con_out[6], con_out[7]], \
                [deg_in[0], deg_in[1], deg_in[2], deg_in[3],deg_in[4], deg_in[5], deg_in[6], deg_in[7], deg_out[0], deg_out[1], deg_out[2], deg_out[3],deg_out[4], deg_out[5], deg_out[6], deg_out[7]], \
@@ -36,9 +36,9 @@ def Griffin4_initM_model(m, t, var_in, con_in ,deg_in, g_in,h_in, bse_in):
     return var_out, con_out, deg_out, g_out, h_out, bse_out
 
 def Griffin4_round_model(R, m, r, t, var_in, con_in ,deg_in, g_in,h_in, bse_in):
-    # 对第r轮轮函数建模，t是分支数
+    # Modeling the rth round round function, t is the number of branches
 
-    # 初始化辅助变量字典
+    # Initializing the auxiliary variable dictionary
     var = {}
     con = {}
     deg = {}
@@ -47,8 +47,8 @@ def Griffin4_round_model(R, m, r, t, var_in, con_in ,deg_in, g_in,h_in, bse_in):
     bse = {}
     equ = {}
 
-    # 变量设置
-    # 第0,1,2,3,4,5,6,7点位是pending四元组 + 基础二元组，直接从本轮输入状态中来
+    # Variable Settings
+    # Points 0,1,2,3,4,5,6,7 are pendent quaternions + basis binary, directly from the current round of input states
     for i in range(t):
         var[i] = var_in[i]
         con[i] = con_in[i]
@@ -56,63 +56,63 @@ def Griffin4_round_model(R, m, r, t, var_in, con_in ,deg_in, g_in,h_in, bse_in):
         g[i] = g_in[i]
         h[i] = h_in[i]
         bse[i] = bse_in[i]
-    # 第8点位是vcde元组
+    # Position 8 is the vcde tuple
     var[8], con[8] = gen_branching_vars_vc(m, r, 8)
     deg[8], g[8], h[8], bse[8] = gen_pending_vars_dghb(m, r, 8)
-    # 第9点位是vcde元组
+    # Position 9 is the vcde tuple
     var[9], con[9], deg[9], equ[9]= gen_branching_vars_vcde(m, r, 9)
-    # 第10点位是 pending四元组
+    # The 10th position is the pending quaternion
     deg[10], g[10], h[10], bse[10] = gen_pending_vars_dghb(m, r, 10)
-    # 第11点位是deg单个变量
+    # The 11th point position is the deg individual variable
     deg[11] = gen_vars_d(m, r, 11)
-    # 第12点位是三元组
+    # Point 12 is a triad
     var[12], con[12], deg[12] = gen_branching_vars_vcd(m, r, 12)
-    # 第13点位是vcde元组
+    # Position 13 is the vcde tuple
     var[13], con[13] = gen_branching_vars_vc(m, r, 13)
     deg[13], g[13], h[13], bse[13] = gen_pending_vars_dghb(m, r, 13)
-    # 第14点位是deg单个变量
+    # The 14th point position is deg individual variables
     deg[14] = gen_vars_d(m, r, 14)
-    # 第15点位是三元组
+    # Point 15 is a triad
     var[15], con[15], deg[15] = gen_branching_vars_vcd(m, r, 15)
-    # 第16点位是vcde元组
+    # Position 16 is the vcde tuple
     var[16], con[16] = gen_branching_vars_vc(m, r, 16)
     deg[16], g[16], h[16], bse[16] = gen_pending_vars_dghb(m, r, 16)
-     # 第17点位是deg单个变量
+     # Point 17 is the deg individual variable
     deg[17] = gen_vars_d(m, r, 17)
-    # 第18点位是三元组
+    # Point 18 is a triad
     var[18], con[18], deg[18] = gen_branching_vars_vcd(m, r, 18)
-    # 第19点位是vcde元组
+    # The 19th point position is the vcde tuple
     var[19], con[19] = gen_branching_vars_vc(m, r, 19)
     deg[19], g[19], h[19], bse[19] = gen_pending_vars_dghb(m, r, 19)
-    #第20点位是deg单个变量
+    #Point 20 is the deg individual variable
     deg[20] = gen_vars_d(m, r, 20)
-    # 第21点位是三元组
+    # Point 21 is a triad.
     var[21], con[21], deg[21] = gen_branching_vars_vcd(m, r, 21)
-    # 第22点位是vcde元组
+    # Position 22 is the vcde tuple
     var[22], con[22] = gen_branching_vars_vc(m, r, 22)
     deg[22], g[22], h[22], bse[22] = gen_pending_vars_dghb(m, r, 22)
-    # 第23点位是deg单个变量
+    # Point 23 is deg individual variable
     deg[23] = gen_vars_d(m, r, 23)
-    # 第24点位是三元组
+    # Point 24 is a triad
     var[24], con[24], deg[24] = gen_branching_vars_vcd(m, r, 24)
-    # 第25点位是vcde元组
+    # The 25th point is the vcde tuple
     var[25], con[25] = gen_branching_vars_vc(m, r, 25)
     deg[25], g[25], h[25], bse[25] = gen_pending_vars_dghb(m, r, 25)
-    # 第26点位是deg单个变量
+    # Point 26 is deg individual variable
     deg[26] = gen_vars_d(m, r, 26)
-    # 第27点位是三元组
+    # Point 27 is the triad
     var[27], con[27], deg[27] = gen_branching_vars_vcd(m, r, 27)
-    # 第28点位是vcde元组
+    # Point 28 is the vcde tuple
     var[28], con[28] = gen_branching_vars_vc(m, r, 28)
     deg[28], g[28], h[28], bse[28] = gen_pending_vars_dghb(m, r, 28)
-    # 添加输出变量：下一轮第29,30,31,32,33,34,35,36 点位是pending四元组 + 基础二元组
+    # Add output variable: next round 29,30,31,32,33,34,35,36 points are pending quaternion + base binary
     for i in [29,30,31,32,33,34,35,36]:
         var[i], con[i] = gen_branching_vars_vc(m, r+1, i-29)
         deg[i], g[i], h[i], bse[i] = gen_pending_vars_dghb(m, r+1, i-29)
 
 
-    # 为每个运算模块添加equ变量
-    # 各运算模块
+    # Add the equ variable to each arithmetic module
+    # Individual computing modules
     equG2 = m.addVar(lb=0, vtype = GRB.INTEGER, name="equG2_{}r".format(r))
     equG1 = m.addVar(lb=0, vtype = GRB.INTEGER, name="equG1_{}r".format(r))
     equG3 = m.addVar(lb=0, vtype = GRB.INTEGER, name="equG3_{}r".format(r))
@@ -130,9 +130,9 @@ def Griffin4_round_model(R, m, r, t, var_in, con_in ,deg_in, g_in,h_in, bse_in):
     equ02728 = m.addVar(lb=0, vtype = GRB.INTEGER, name="equ02728_{}r".format(r))
     m.update()
 
-    # 对各分支模块添加约束
+    # Adding constraints to each branch module
     # 0 pending-up; 1 pending-up(s),同pending-up; 2 pending-up;
-    # 5 pending-up(s),同pending-up
+    # 5 pending-up(s),same as pending-up
     for i in [0,1,2,3,4,5,6,8]:
         pending_up(m, var[i], con[i], g[i], deg[i], "{}r_{}".format(r,i))
     # down-pending
@@ -144,7 +144,7 @@ def Griffin4_round_model(R, m, r, t, var_in, con_in ,deg_in, g_in,h_in, bse_in):
     # 9-10-11-14-17-20-23-26 down-pending-ups
     down_pending_ups(m, deg[9],deg[10], g[10],[deg[11], deg[14],deg[17],deg[20],deg[23],deg[26]], var[9], con[9],equ[9], "{}r_9".format(r))
 
-    # 对各运算模块添加约束
+    # Adding constraints to the algorithms
     #0,7 8 multiplication
     multiplication_module(m, [deg[0], deg[27]], var[28], con[28], deg[28], equ02728, "{}r_02728M".format(r))
     # 1,10,11 multiplication
@@ -153,9 +153,9 @@ def Griffin4_round_model(R, m, r, t, var_in, con_in ,deg_in, g_in,h_in, bse_in):
     multiplication_module(m, [deg[3], deg[18]], var[19], con[19], deg[19], equ31819, "{}r_31819M".format(r))
     multiplication_module(m, [deg[4], deg[15]], var[16], con[16], deg[16], equ41516, "{}r_41516M".format(r))
     multiplication_module(m, [deg[5], deg[12]], var[13], con[13], deg[13], equ51213, "{}r_51213M".format(r))
-    # 2,4 单变量非线性模块
+    # 2,4 Univariate nonlinear modules
     NLUP_module(m, [var[6], var[9]],[con[6], con[9]], [deg[6], deg[9]], equ69, "{}r_S1".format(r), d)
-    # 5,3 单变量非线性模块
+    # 5,3 Univariate nonlinear modules
     NLUP_module(m, [var[8], var[7]], [con[8], con[7]], [deg[8], deg[7]], equ87, "{}r_S2".format(r), d)
     # G2
     NLMP_module(m, [deg[5], deg[8], deg[14]], var[15], con[15], deg[15], equG2, "{}r_G2".format(r), 2)
@@ -175,7 +175,7 @@ def Griffin4_round_model(R, m, r, t, var_in, con_in ,deg_in, g_in,h_in, bse_in):
                [bse[28],bse[25],bse[22], bse[19],bse[16],bse[13],bse[10],bse[8],bse[29],bse[30],bse[31], bse[32],bse[33],bse[34],bse[35],bse[36]],\
                equMDS,  "{}r_MDS".format(r))
 
-    # 将本轮的输出变量返回
+    # Returns the output variable of the round
     var_out = [var[29],var[30],var[31],var[32], var[33], var[34], var[35], var[36]]
     con_out = [con[29], con[30], con[31], con[32], con[33], con[34], con[35], con[36]]
     deg_out = [deg[29],deg[30],deg[31], deg[32],deg[33],deg[34],deg[35],deg[36]]
@@ -187,7 +187,7 @@ def Griffin4_round_model(R, m, r, t, var_in, con_in ,deg_in, g_in,h_in, bse_in):
     return var_out, con_out, deg_out, g_out, h_out, bse_out
 
 def parsing_Griffin4_solution(m, R):
-    # 初始MDS
+    # Initial MDS
     print('------------r = {}-------------'.format(-1))
     print('var_-1r', end=" ")
     for j in range(t):
@@ -220,7 +220,7 @@ def parsing_Griffin4_solution(m, R):
     for j in range(t):
         print(round(m.getVarByName("g_0r_{}".format(j)).X), end=" ")
     print("\nequMDS_-1r", round(m.getVarByName("equMDS_-1r").X))
-    # 每轮
+    # each round
     for r in range(R):
         print('--------------r = {}-----------------'.format(r))
         print('var_{}r'.format(r), end=" ")
@@ -266,11 +266,11 @@ def parsing_Griffin4_solution(m, R):
             if var.X > 0:
                 print(var.VarName, "=", var.X)
 def gen_Griffin4_model(R, t, numVar):
-    # R: 轮数; t: 分支数； numVar: 引入变量个数
+    # R: number of rounds; t: number of branches; numVar: number of introduced variables
 
-    # 创建模型
+    # Creating Models
     m = gp.Model("Griffin4_CICO_MILP_{}r_{}t_{}v".format(R, t, numVar))
-    # 创建输入变量：pending四元组+输入状态二元组
+    # Create input variables: pending quaternion + input state binary
     var_in={};con_in={};deg_in={};g_in={};h_in={};bse_in={};
     for i in range(t):
         var_in[i] = m.addVar(lb=0, ub=1, vtype=GRB.BINARY, name="var_-1r_{}".format(i))
@@ -281,10 +281,10 @@ def gen_Griffin4_model(R, t, numVar):
         bse_in[i] = m.addVar(lb=0, ub=1, vtype=GRB.BINARY, name="bse_-1r_{}".format(i))
     m.update()
 
-    # 输入边界的约束
-    # （1/3） CICO中的输入约束
+    # Input Boundary Constraints
+    # （1/3） Input constraints in CICO
     m.addConstr(con_in[0] == 1)
-    # （2/3）输入边界添加 var=0,con=0 则 g=0的约束
+    # （2/3）Input boundaries add the constraint that var=0,con=0 then g=0
     varPcon = {}
     for i in range(t):
         varPcon[i] = m.addVar(lb=0, ub=1, vtype=GRB.BINARY, name="varPcon_" + "{}r_MDS_{}".format(-1, i))
@@ -293,22 +293,22 @@ def gen_Griffin4_model(R, t, numVar):
         m.addConstr(varPcon[i] == var_in[i] + con_in[i])
         m.addConstr((varPcon[i] == 0) >> (g_in[i] == 0))
     m.update()
-    # （3/3） 共有约束
+    # （3/3） constraints
     for i in range(t):
         common_constraints(m, var_in[i], con_in[i], deg_in[i])
 
-    # 初始MDS变换
+    # Initial MDS transformation
     var_in, con_in, deg_in, g_in, h_in, bse_in = Griffin4_initM_model(m, t, var_in, con_in, deg_in, g_in, h_in, bse_in)
 
-    # 每轮建立模型
+    # Modeling per round
     for r in range(R):
         var_in, con_in, deg_in, g_in, h_in, bse_in = \
             Griffin4_round_model(R, m, r, t, var_in, con_in, deg_in, g_in, h_in, bse_in)
 
-    # 输出边间的约束
-    # （1/3）CICO中的输出约束
+    # Constraints between output edges
+    # （1/3）Output constraints in CICO
     m.addConstr(con_in[t - 1] == 1)
-    # （2/3）输出边界添加 var=0,con=0 则 g=0的约束
+    # （2/3）Output bounds add the constraint that var=0,con=0 then g=0
     for i in range(t):
         varPcon[i] = m.addVar(lb=0, ub=1, vtype=GRB.BINARY, name="varPcon_" + "{}r_{}".format(R, i))
     m.update()
@@ -316,26 +316,26 @@ def gen_Griffin4_model(R, t, numVar):
         m.addConstr(varPcon[i] == var_in[i] + con_in[i])
         m.addConstr((varPcon[i] == 0) >> (g_in[i] == 0))
     m.update()
-    # （3/3） 共有约束
+    # （3/3） communal restraint
     for i in range(t):
         common_constraints(m, var_in[i], con_in[i], deg_in[i])
 
 
-    # 常数个数
+    # Number of constants
     all_con_vars = [var for var in m.getVars() if "con_" in var.VarName[:4]]
-    repeated_con_vars = [] # S盒前后的常数只取一个，把重复的去掉
+    repeated_con_vars = [] # Take only one constant before and after the S-box and remove the duplicates
     for r in range(R):
         repeated_con_vars.append(m.getVarByName("con_{}r_9".format(r)))
         repeated_con_vars.append(m.getVarByName("con_{}r_8".format(r)))
     sum_cons = sum(all_con_vars) - sum(repeated_con_vars)
-    m.addConstr(sum_cons == t) #常数个数等于t，则平均有1个解
+    m.addConstr(sum_cons == t) #The number of constants is equal to t, then on average there is 1 solution
 
-    # 给定变量个数
+    # Given the number of variables
     all_vars = [var for var in m.getVars() if "var_" in var.VarName]
     m.addConstr(sum(all_vars) == numVar)
 
-    # 目标函数
-    # 方程次数之和
+    # objective function
+    # Sum of the number of equations
     all_equs = [var for var in m.getVars() if "equ" in var.VarName]
     obj = m.addVar(vtype=GRB.INTEGER, name="obj")
     m.update()
@@ -343,7 +343,7 @@ def gen_Griffin4_model(R, t, numVar):
     m.setObjective(obj, GRB.MINIMIZE)
     m.update()
 
-    # 人为添加约束
+    # Artificially added constraints
     '''
     m.addConstr(m.getVarByName("var_0r_1")==1)
     m.addConstr(m.getVarByName("var_0r_2") == 1)
@@ -366,18 +366,18 @@ def gen_Griffin4_model(R, t, numVar):
     m.addConstr(m.getVarByName("var_5r_5") == 1)
     '''
 
-    # 模型设置
-    m.setParam("TimeLimit", 600) # 设定跑600秒后就停止，输出当前找到的最优解
-    # m.setParam("BestObjStop", 100) #设定目标函数低于100时就停止
+    # Model settings
+    m.setParam("TimeLimit", 600) # Set the run to stop after 600 seconds and output the currently found optimal solution
+    # m.setParam("BestObjStop", 100) #Set the objective function to stop when it falls below 100
     m.write("Griffin4_CICO_MILP_{}rrrrrr_{}t_{}v.lp".format(R, t, numVar))
     m.optimize()
     m.write("Griffin4_MILP_{}r_{}t_{}v.sol".format(R, t, numVar))
     parsing_Griffin4_solution(m, R)
-    print("分支数：{}，".format(t))
-    print('轮数：{}，'.format(R))
-    print('变量个数：{}，'.format(numVar))
-    print('方程次数之和：{}'.format(obj.X))
-    print('求解复杂度：2 ^ {}'.format(log2(comb(int(obj.X) + 1, numVar) ** 2)))
+    print("Number of branches：{}，".format(t))
+    print('round：{}，'.format(R))
+    print('Number of variables：{}，'.format(numVar))
+    print('Sum of the number of equations：{}'.format(obj.X))
+    print('solution complexity：2 ^ {}'.format(log2(comb(int(obj.X) + 1, numVar) ** 2)))
 
 if __name__ == '__main__':
     gen_Griffin4_model(4, 8, 8)
