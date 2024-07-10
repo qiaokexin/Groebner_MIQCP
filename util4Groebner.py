@@ -102,15 +102,8 @@ def MDS_module(m, t, var, con, deg, g, h, bse, equ, index): # constraints for MD
     m.addConstrs((con[i] == 1) >> (g[i] ==1) for i in range(2*t))
     # 添加sum_con <=t
     m.addConstr(sum_con <= t)
-    # 若var =0, con = 0, 则 g= 0 (只在上游和边界情况中引入)
-    #for i in range(2 * t):
-    #    stt = func(i, index[0])
-    #    if stt == 'upstream' or stt =='boarder':
-     #       m.addConstr((varPcon[i] == 0) >> (g[i] == 0) )
     # 基只能从消耗自由度的状态中选取(没必要，h的取值已经保证了这一点)
     #m.addConstrs(bse[i] <= g[i] for i in range(2*t))
-    # 防止平凡解，当分支上不引入常数时，次数大于等于1. 这里有问题，deg=0可以是由全常数输入计算出的
-    #m.addConstrs((con[i] == 0) >> (deg[i] >= 1) for i in range(2*t))
     # h 在数值上等于 g - bse
     m.addConstrs(h[i] == g[i] - bse[i] for i in range(2*t))
     # 基中有t个分支
@@ -255,10 +248,8 @@ def multiplication_module(m, deg_in, var_out, con_out, deg_out, equ, index):# �
     return varPcon_out
 
 def common_constraints(m, var, con, deg):
-    #m.addConstr(var + con <= 1) # 已经在与deg的关系中暗含了不可能同时为1
     m.addConstr((var == 1) >> (deg == 1))
     m.addConstr((con == 1) >> (deg == 0))
-    ##m.addConstr((con == 0) >> (deg >= 1)) # 不能处处都加，deg=0也可能是由常数计算得到的
     m.update()
 
 def down_up(m, var, con, deg):
@@ -282,22 +273,15 @@ def down_pending_pending(m, g1, deg1, g2, deg2, var, con, deg, equ, index):
     BIN_g1Pg2eq2 = m.addVar(lb=0, ub=1, vtype=GRB.BINARY, name="BIN_g1Pg2eq2_" + index)
     BIN_g1Pg2eq1 = m.addVar(lb=0, ub=1, vtype=GRB.BINARY, name="BIN_g1Pg2eq1_" + index)
     BIN_g1Pg2eq0 = m.addVar(lb=0, ub=1, vtype=GRB.BINARY, name="BIN_g1Pg2eq0_" + index)
-    #g1Pg2M1 = m.addVar(lb=-1, ub=2, vtype=GRB.INTEGER, name="g1Pg2M1_" + index)
-    #g1Tg2 = m.addVar(lb=0, ub=1, vtype=GRB.BINARY, name="g1Tg2_" + index)
+    
     min_deg = m.addVar(lb=0, vtype=GRB.INTEGER, name="min_deg_" + index)
     max_deg = m.addVar(lb=0, vtype=GRB.INTEGER, name="max_deg_" + index)
-    #g1Tdeg1 = m.addVar(lb=0, vtype=GRB.INTEGER, name="g1Tdeg1_" + index)
-    #g2Tdeg2 = m.addVar(lb=0, vtype=GRB.INTEGER, name="g2Tdeg2_" + index)
+    
 
 
     m.update()
 
-    #m.addConstr(g1Pg2 == g1 + g2)
-
-    #m.addConstr(g1Pg2M1 == g1 + g2 - 1)
-
-    #m.addQConstr(g1Tg2 == g1 * g2)
-
+    
     # (g1,g2, BIN_g1Pg2eq0)
     m.addLConstr(-1 * g1 - g2 - 2 * BIN_g1Pg2eq0 >= -2)
     m.addLConstr(2 * g1 + 2 * g2 + 2 * BIN_g1Pg2eq0 >= 2)
@@ -317,9 +301,7 @@ def down_pending_pending(m, g1, deg1, g2, deg2, var, con, deg, equ, index):
 
     m.addGenConstrMax(max_deg, [deg1, deg2, deg])
 
-    #m.addQConstr(g1Tdeg1 == g1 * deg1)
-
-    #m.addQConstr(g2Tdeg2 == g2 * deg2)
+    
     
     # 添加约束
     #g1 + g2 = 2 
@@ -329,7 +311,6 @@ def down_pending_pending(m, g1, deg1, g2, deg2, var, con, deg, equ, index):
     # g1 + g2 = 0
     m.addConstr((BIN_g1Pg2eq0 == 1) >> (equ == deg1 + deg2 + deg - min_deg))
     # g1 + g2 = 1
-    #m.addConstr((BIN_g1Pg2eq1 == 1) >> (deg1 + deg2 + deg - min_deg - max_deg == g1Tdeg1 + g2Tdeg2)) # 入基的那个的次数是剩下两个分支中最小的，程序会自动使其为最小的
     m.addConstr((BIN_g1Pg2eq1 == 1) >> (deg1 + deg2 + deg - max_deg == 2 * min_deg))
     m.addConstr((BIN_g1Pg2eq1 == 1) >> (equ == max_deg))
 
@@ -339,8 +320,7 @@ def down_pending_pending(m, g1, deg1, g2, deg2, var, con, deg, equ, index):
     common_constraints(m, var, con, deg2)
 
     m.update()
-    #return g1Pg2, BIN_g1Pg2eq1, g1Tg2, min_deg, max_deg, g1Tdeg1, g2Tdeg2
-
+    
 def pending_up(m, var, con, g, deg, index):
     # 添加辅助变量
     varPcon = m.addVar(lb = 0, ub = 1, vtype = GRB.BINARY, name = "varPcon_" + index)
@@ -358,20 +338,20 @@ def pending_up(m, var, con, g, deg, index):
 
 def down_pending_ups(m, deg_d, deg_p, g, deg_us, var, con, equ, index):
     # 添加辅助变量
-    #varPcon = m.addVar(lb = 0, ub = 1, vtype = GRB.BINARY, name = "varPcon_" + index)
+   
     min_deg_dp = m.addVar(lb=0, vtype=GRB.INTEGER, name="min_degdp_" + index)
 
     m.update()
 
 
-    #m.addConstr(varPcon == var + con)
+ 
 
     m.addGenConstrMin(min_deg_dp, [deg_d, deg_p])
 
     # 添加约束，按 g 划分
     m.addConstr((g ==1) >> (deg_p == deg_d))
     m.addConstr((g ==0) >> (equ == deg_d +deg_p - min_deg_dp))
-    # m.addConstr((varPcon == 0) >> (g == 1)) 这个去掉
+   
     for deg_u in deg_us:
         m.addConstr((g ==1) >> (deg_u == deg_d))
         m.addConstr((g == 0) >> (deg_u == min_deg_dp))
@@ -379,10 +359,10 @@ def down_pending_ups(m, deg_d, deg_p, g, deg_us, var, con, equ, index):
     common_constraints(m, var, con, deg_d)
     m.update()
     return min_deg_dp
+    
 def pending_pending(m, deg1, deg2, g1, g2, var, con, equ, index):
     # 添加辅助变量
     varPcon = m.addVar(lb=0, ub=1, vtype=GRB.BINARY, name="varPcon_" + index)
-    #g1Pg2 = m.addVar(lb = 0, ub = 1, vtype = GRB.BINARY, name = "g1Pg2_" + index)
     BIN_g1Pg2eq1 = m.addVar(lb=0, ub=1, vtype=GRB.BINARY, name="BIN_g1Pg2eq1_" + index)
     BIN_g1Pg2eq0 = m.addVar(lb=0, ub=1, vtype=GRB.BINARY, name="BIN_g1Pg2eq0_" + index)
 
@@ -390,7 +370,7 @@ def pending_pending(m, deg1, deg2, g1, g2, var, con, equ, index):
     m.update()
 
     m.addConstr(varPcon == var + con)
-    #m.addConstr(g1Pg2 == g1 + g2)
+   
 
     # (g1,g2, BIN_g1Pg2eq0)
     m.addLConstr(-1 * g1 - g2 - 2 * BIN_g1Pg2eq0 >= -2)
@@ -415,7 +395,7 @@ def pending_pending(m, deg1, deg2, g1, g2, var, con, equ, index):
     common_constraints(m, var, con, deg1)
     common_constraints(m, var, con, deg2)
     m.update()
-    #return g1Pg2, max_deg
+  
 
 
 
@@ -438,26 +418,24 @@ def pending_pending_up(m, deg1, deg2, g1, g2, var, con, deg, equ, index):
     common_constraints(m, var, con, deg)
 
     m.update()
-    #return g1Pg2, max_deg, min_deg
+   
 
 
 
 
 def pending_pending_pending(m, deg1, deg2, deg3, g1, g2, g3, var, con, equ, index):
     # 添加辅助变量
-    #sumg = m.addVar(lb=0, vtype=GRB.INTEGER, name="sumg_" + index)
+  
     varPcon = m.addVar(lb=0, ub=1, vtype=GRB.BINARY, name="varPcon_" + index)
     BIN_sumg0 = m.addVar(lb = 0, ub = 1, vtype = GRB.BINARY, name = "BIN_sumg0_" + index)
     BIN_sumg1 = m.addVar(lb=0, ub=1, vtype=GRB.BINARY, name="BIN_sumg1_" + index)
     BIN_sumg2 = m.addVar(lb=0, ub=1, vtype=GRB.BINARY, name="BIN_sumg2_" + index)
     max_deg = m.addVar(lb=0, vtype=GRB.INTEGER, name="max_deg_" + index)
     min_deg = m.addVar(lb=0, vtype=GRB.INTEGER, name="min_deg_" + index)
-    #g1Tdeg1 = m.addVar(lb=0, vtype=GRB.INTEGER, name="g1Tdeg1_" + index)
-    #g2Tdeg2 = m.addVar(lb=0, vtype=GRB.INTEGER, name="g2Tdeg2_" + index)
-    #g3Tdeg3 = m.addVar(lb=0, vtype=GRB.INTEGER, name="g3Tdeg3_" + index)
+   
     m.update()
 
-    #m.addConstr(sumg == g1 + g2 + g3)
+    
 
 
     # (g1,g2,g3, BIN_sumg0)
@@ -486,11 +464,7 @@ def pending_pending_pending(m, deg1, deg2, deg3, g1, g2, g3, var, con, equ, inde
 
     m.addGenConstrMin(min_deg, [deg1, deg2, deg3])
 
-    #m.addQConstr(g1Tdeg1 == g1 * deg1)
-
-    #m.addQConstr(g2Tdeg2 == g2 * deg2)
-
-    #m.addQConstr(g3Tdeg3 == g3 * deg3)
+    
 
     # 添加约束
     m.addConstr((varPcon == 0) >> (g1 + g2 + g3 <= 2))
@@ -500,7 +474,6 @@ def pending_pending_pending(m, deg1, deg2, deg3, g1, g2, g3, var, con, equ, inde
     m.addConstr((BIN_sumg2 == 1) >> (equ == 0))
 
     # g1 + g2 + g3 = 1.
-    #m.addConstr((BIN_sumg1 == 1) >> (min_deg == g1Tdeg1 + g2Tdeg2 + g3Tdeg3))
     m.addConstr((BIN_sumg1 == 1) >> (deg1 + deg2 + deg3 -max_deg - 2* min_deg == 0))
     m.addConstr((BIN_sumg1 == 1) >> (equ == max_deg))
 
