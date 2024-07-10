@@ -3,81 +3,81 @@ from math import comb, log2
 
 alpha = 3
 def Anemoi_round_model(m, r, l, var_in, con_in, deg_in, g_in, h_in, bse_in):
-    # 对第 r 轮轮函数建模，l是MDS的宽度, var_in及后面的变量是本轮的输入变量
+    # Modeling the rth round of the round function, l is the width of the MDS, var_in and the variables that follow are the input variables for this round
 
-    # 初始化辅助变量字典
+    # Initializing the auxiliary variable dictionary
     var={}; con ={}; deg = {}; g = {}; h = {}; bse = {}; equ = {};
-    # 变量设置
+    # Variable Settings
     for i in range(l):
-        # 对各个分支模块添加变量
-        # 第 0个点位是pending四元组+基础二元组，直接从输入中获得
+        # Add variables to each branch module
+        # The 0th point position is the pending quaternion + base binary, obtained directly from the input
         var[26 * i + 0] = var_in[i]
         con[26 * i + 0] = con_in[i]
         deg[26 * i + 0] = deg_in[i]
         g[26 * i + 0] = g_in[i]
         h[26 * i + 0] = h_in[i]
         bse[26 * i + 0] = bse_in[i]
-        # 第 1 个点位是pending四元组+基础二元组，直接从输入中获得
+        # The 1st point position is the pending quaternion + the base binary, obtained directly from the input
         var[26 * i + 1] = var_in[l + i]
         con[26 * i + 1] = con_in[l + i]
         deg[26 * i + 1] = deg_in[l + i]
         g[26 * i + 1] = g_in[l + i]
         h[26 * i + 1] = h_in[l + i]
         bse[26 * i + 1] = bse_in[l + i]
-        # 第 2 个点位是pending四元组
+        # The second point is the pending quaternion
         deg[26 * i + 2], g[26 * i + 2], h[26 * i + 2], bse[26 * i + 2] = gen_pending_vars_dghb(m, r, "{}th_{}".format(i,2))
-        # 第 3 个点位是pending四元组
+        # The third point is the pending quaternion
         deg[26 * i + 3], g[26 * i + 3], h[26 * i + 3], bse[26 * i + 3] = gen_pending_vars_dghb(m, r, "{}th_{}".format(i,3))
-        # 第 4，5 个点位是var,con,equ三元组
+        # Points 4 and 5 are the var,con,equ triples.
         var[26 * i + 4], con[26 * i + 4], equ[26 * i + 4] = gen_branching_vars_vce(m, r, "{}th_{}".format(i,4))
         var[26 * i + 5], con[26 * i + 5], equ[26 * i + 5] = gen_branching_vars_vce(m, r, "{}th_{}".format(i,5))
-        # 第6,7,8,9点位是pending四元组
+        # Points 6,7,8,9 are pendent quaternions.
         for j in range(6, 10):
             deg[26 * i + j], g[26 * i + j], h[26 * i + j], bse[26 * i + j] = gen_pending_vars_dghb(m, r, "{}th_{}".format(i,j))
-        # 第 10 个点位是var,con,equ三元组
+        # The 10th point is the var,con,equ triad.
         var[26 * i + 10], con[26 * i + 10], equ[26 * i + 10] = gen_branching_vars_vce(m, r, "{}th_{}".format(i,10))
-        # 第 11 个点位是pending四元组
+        # The 11th point is the pending quaternion
         deg[26 * i + 11], g[26 * i + 11], h[26 * i + 11], bse[26 * i + 11] = gen_pending_vars_dghb(m, r, "{}th_{}".format(i,11))
-        # 第 12 个点位是var,con,deg,equ四元组
+        # The 12th point is the var,con,deg,equ quaternion.
         var[26 * i + 12], con[26 * i + 12], deg[26 * i + 12], equ[26 * i + 12] = gen_branching_vars_vcde(m, r, "{}th_{}".format(i,12))
-        # 第 13 个点位是pending四元组+二元组
+        # The 13th point is the pending quaternion + binary
         deg[26 * i + 13], g[26 * i + 13], h[26 * i + 13], bse[26 * i + 13] = gen_pending_vars_dghb(m, r, "{}th_{}".format(i,13))
         var[26 * i + 13], con[26 * i + 13] = gen_branching_vars_vc(m, r, "{}th_{}".format(i,13))
-        # 第 14, 15个点位是pending四元组
+        # Points 14, 15 are pendant quaternions.
         deg[26 * i + 14], g[26 * i + 14], h[26 * i + 14], bse[26 * i + 14] = gen_pending_vars_dghb(m, r, "{}th_{}".format(i,14))
         deg[26 * i + 15], g[26 * i + 15], h[26 * i + 15], bse[26 * i + 15] = gen_pending_vars_dghb(m, r, "{}th_{}".format(i,15))
-        # 第 16 个点位是pending四元组+二元组
+        # The 16th point is the pending quaternion + binary
         deg[26 * i + 16], g[26 * i + 16], h[26 * i + 16], bse[26 * i + 16] = gen_pending_vars_dghb(m, r, "{}th_{}".format(i,16))
         var[26 * i + 16], con[26 * i + 16] = gen_branching_vars_vc(m, r, "{}th_{}".format(i,16))
-        # 第 17 个点位是var,con,deg,equ四元组
+        # The 17th point is the var,con,deg,equ quaternion.
         var[26 * i + 17], con[26 * i + 17], deg[26 * i + 17], equ[26 * i + 17] = gen_branching_vars_vcde(m, r, "{}th_{}".format(i,17))
-        # 第 18, 19个点位是pending四元组
+        # The 18th and 19th points are pendant quaternions.
         deg[26 * i + 18], g[26 * i + 18], h[26 * i + 18], bse[26 * i + 18] = gen_pending_vars_dghb(m, r, "{}th_{}".format(i,18))
         deg[26 * i + 19], g[26 * i + 19], h[26 * i + 19], bse[26 * i + 19] = gen_pending_vars_dghb(m, r, "{}th_{}".format(i,19))
-        # 第 20 个点位是var,con,deg,equ四元组，但其中var, con按照下一轮的指标命名
+        # The 20th point is the var,con,deg,equ quaternion, but where var, con are named according to the next round of indicators
         deg[26 * i + 20] = m.addVar(lb = 0, vtype = GRB.INTEGER, name = "deg_{}r_{}th_{}".format(r, i, 20))
         equ[26 * i + 20] = m.addVar(lb = 0, vtype = GRB.INTEGER, name = "equ_{}r_{}th_{}".format(r, i, 20))
         var[26 * i + 20], con[26 * i + 20] = gen_branching_vars_vc(m, r + 1, "{}th_{}".format(i, 1))
-        # 第 21 个点位是pending四元组+二元组
+        # The 21st point is pending quaternion + binary
         deg[26 * i + 21], g[26 * i + 21], h[26 * i + 21], bse[26 * i + 21] = gen_pending_vars_dghb(m, r, "{}th_{}".format(i,21))
         var[26 * i + 21], con[26 * i + 21] = gen_branching_vars_vc(m, r, "{}th_{}".format(i,21))
-        # 第 22 个点位是pending四元组
+        # The 22nd point is the pending quaternion.
         deg[26 * i + 22], g[26 * i + 22], h[26 * i + 22], bse[26 * i + 22] = gen_pending_vars_dghb(m, r,
                                                                                                    "{}th_{}".format(i,
                                                                                                                     22))
-        # 第 23 个点位是equ+vc二元组，其中vc二元组按照下一轮的指标命名
+        # The 23rd point is the equ+vc binary, where the vc binary is named according to the next round of indicators
         equ[26 * i + 23] = m.addVar(lb=0, vtype=GRB.INTEGER, name="equ_{}r_{}th_{}".format(r, i, 23))
         var[26 * i + 23], con[26 * i + 23] = gen_branching_vars_vc(m, r + 1, "{}th_{}".format(i, 0))
 
 
-        # 第 24,25点位是下一轮的输入,pending四元组,按照下一轮的角标取名
+        # Points 24 and 25 are the inputs for the next round. Pending quaternions, named according to the next round's corners.
         deg[26 * i + 24], g[26 * i + 24], h[26 * i + 24], bse[26 * i + 24] = gen_pending_vars_dghb(m, r+1, "{}th_{}".format(i,0))
         deg[26 * i + 25], g[26 * i + 25], h[26 * i + 25], bse[26 * i + 25] = gen_pending_vars_dghb(m, r + 1,
                                                                                                    "{}th_{}".format(i,1))
 
 
-        # 为每个运算模块添加equ变量
-        # 各运算模块
+        # Add the equ variable to each arithmetic module
+        # Modules of operation
         equ_smallMDS= m.addVar(lb=0, vtype=GRB.INTEGER, name="equ_smallMDS_{}r_{}".format(r, i))
         equ111314 = m.addVar(lb=0, vtype=GRB.INTEGER, name="equ111314_{}r_{}".format(r, i))
         equ1213 = m.addVar(lb=0, vtype=GRB.INTEGER, name="equ1213_{}r_{}".format(r, i))
@@ -86,7 +86,7 @@ def Anemoi_round_model(m, r, l, var_in, con_in, deg_in, g_in, h_in, bse_in):
         equ2021 = m.addVar(lb=0, vtype=GRB.INTEGER, name="equ2021_{}r_{}".format(r, i))
         equ182122 = m.addVar(lb=0, vtype=GRB.INTEGER, name="equ182122_{}r_{}".format(r, i))
 
-        # 对各分支模块添加约束
+        # Adding constraints to each branch module
         # 2,4,6 pending-pending
         pending_pending(m, deg[26 * i + 2], deg[26 * i + 6], g[26 * i + 2], g[26 * i + 6], var[26 * i + 4],
                         con[26 * i + 4], equ[26 * i + 4], "{}r_{}th_2-4-6".format(r, i))
@@ -119,7 +119,7 @@ def Anemoi_round_model(m, r, l, var_in, con_in, deg_in, g_in, h_in, bse_in):
                         con[26 * i + 23], equ[26 * i + 23], "{}r_{}th_22-23-24".format(r, i))
 
 
-        # 对各运算模块添加约束
+        # Adding constraints to each branch module
         # 6,7,8,9 小MDS
         MDS_module(m, 2, [var[26 * i + 4], var[26 * i + 5], var[26 * i + 10], var[26 * i + 12]],\
                    [con[26 * i + 4], con[26 * i + 5], con[26 * i + 10], con[26 * i + 12]],
@@ -162,12 +162,12 @@ def Anemoi_round_model(m, r, l, var_in, con_in, deg_in, g_in, h_in, bse_in):
         NLUP_module(m, [var[26 * i + 20], var[26 * i + 21]], [con[26 * i + 20], con[26 * i + 21]],
                     [deg[26 * i + 20], deg[26 * i + 21]], equ2021, "{}r_{}th_2021".format(r, i), 2)
 
-    # 若l大于等于2，添加仿射层
+    # If l is greater than or equal to 2, add the affine layer
     if (l >= 2):
         equMDS1 = m.addVar(lb=0, vtype=GRB.INTEGER, name="equMDS1_{}r_{}".format(r, i))
         equMDS2 = m.addVar(lb=0, vtype=GRB.INTEGER, name="equMDS2_{}r_{}".format(r, i))
 
-        # 准备MDS模块的输入和输出变量
+        # Prepare the input and output variables for the MDS module
         MDS_var1 = []
         MDS_con1 = []
         MDS_deg1 = []
@@ -181,7 +181,7 @@ def Anemoi_round_model(m, r, l, var_in, con_in, deg_in, g_in, h_in, bse_in):
         MDS_h2 = []
         MDS_bse2 = []
         for i in range(l):
-            # 第一个MDS的变量
+            # Variables for the first MDS
             MDS_var1.append(var[26 * i])
             MDS_var1.append(var[26 * i + 4])
             MDS_con1.append(con[26 * i])
@@ -194,7 +194,7 @@ def Anemoi_round_model(m, r, l, var_in, con_in, deg_in, g_in, h_in, bse_in):
             MDS_h1.append(h[26 * i + 2])
             MDS_bse1.append(bse[26 * i])
             MDS_bse1.append(bse[26 * i + 2])
-            # 第二个MDS的变量
+            # Variables for the second MDS
             MDS_var2.append(var[26 * i + 1])
             MDS_var2.append(var[26 * i + 5])
             MDS_con2.append(con[26 * i + 1])
@@ -207,12 +207,12 @@ def Anemoi_round_model(m, r, l, var_in, con_in, deg_in, g_in, h_in, bse_in):
             MDS_h2.append(h[26 * i + 3])
             MDS_bse2.append(bse[26 * i + 1])
             MDS_bse2.append(bse[26 * i + 3])
-            # 第一个MDS的约束
+            # The first MDS constraint
         MDS_module(m, l, MDS_var1, MDS_con1, MDS_deg1, MDS_g1, MDS_h1, MDS_bse1, equMDS1, "_{}r_MDS1".format(r))
-        # 第二个MDS的约束
+        # The second MDS constraint
         MDS_module(m, l, MDS_var2, MDS_con2, MDS_deg2, MDS_g2, MDS_h2, MDS_bse2, equMDS2, "_{}r_MDS2".format(r))
 
-    # 将本轮的输出变量返回
+    # Returns the output variable of the round
     var_out = []
     con_out = []
     deg_out = []
@@ -244,7 +244,7 @@ def last_MDS_model(m,  l, var_in, con_in, deg_in, g_in, h_in, bse_in):
     g_out = []
     h_out = []
     bse_out = []
-    # 添加输出变量
+    # Adding Output Variables
     for i in range(2*l):
         var_out.append(m.addVar(lb=0, ub=1, vtype=GRB.BINARY, name="var_R_{}".format(i)))
         con_out.append(m.addVar(lb=0, ub=1, vtype=GRB.BINARY, name="con_R_{}".format(i)))
@@ -257,7 +257,7 @@ def last_MDS_model(m,  l, var_in, con_in, deg_in, g_in, h_in, bse_in):
     equ_M_1 = m.addVar(lb=0, vtype=GRB.INTEGER, name="equMDS_R_1")
     m.update()
 
-    # MDS 约束
+    # MDS constraints
     MDS_module(m, l, var_in[:l] + var_out[:l], \
                con_in[:l] + con_out[:l], \
                deg_in[:l] + deg_out[:l], g_in[:l] + g_out[:l], h_in[:l] + h_out[:l], \
@@ -269,11 +269,11 @@ def last_MDS_model(m,  l, var_in, con_in, deg_in, g_in, h_in, bse_in):
 
     return var_out, con_out, deg_out, g_out, h_out, bse_out
 def gen_Anemoi_model(R, l, numVar):
-    # R是轮数，l是一半的分支数, numVar是设定的变量的个数
+    # R is the number of rounds, l is half the number of branches, numVar is the number of set variables
 
-    # 创建模型
+    # Creating Models
     m = gp.Model("Anemoi_CICO_MILP_{}r_{}l_{}v".format(R, l, numVar))
-    # 创建输入变量：pending四元组+输入状态二元组
+    # Create input variables: pending quaternion + input state binary
     var_in = {};
     con_in = {};
     deg_in = {};
@@ -296,13 +296,13 @@ def gen_Anemoi_model(R, l, numVar):
         bse_in[l+i] = m.addVar(lb=0, ub=1, vtype=GRB.BINARY, name="bse_0r_{}th_1".format(i))
     m.update()
 
-    # 输入边界的约束
-    # （1/3） CICO中的输入约束
+    # Input boundary constraints
+    # （1/3） Input constraints in CICO
     m.addConstr(con_in[0] == 1)
 
     m.update()
 
-    # （2/3）输入边界添加 var=0,con=0 则 g=0的约束
+    # （2/3）Input boundaries add the constraint that var=0,con=0 then g=0
     varPcon = {}
     for i in range(2*l):
         varPcon[i] = m.addVar(lb=0, ub=1, vtype=GRB.BINARY, name="varPcon_in_{}".format(i))
@@ -311,24 +311,24 @@ def gen_Anemoi_model(R, l, numVar):
         m.addConstr(varPcon[i] == var_in[i] + con_in[i])
         m.addConstr((varPcon[i] == 0) >> (g_in[i] == 0))
     m.update()
-    # （3/3） 共有约束
+    # （3/3） communal restraint
     for i in range(2*l):
         common_constraints(m, var_in[i], con_in[i], deg_in[i])
 
-    # 每轮建立模型
+    # Modeling per round
     for r in range(R):
         var_in, con_in, deg_in, g_in, h_in, bse_in = Anemoi_round_model(m, r, l, var_in, con_in, deg_in, g_in, h_in,
                                                                         bse_in)
-    # 最后的MDS
+    # The Last MDS
     var_in, con_in, deg_in, g_in, h_in, bse_in = last_MDS_model(m, l, var_in, con_in, deg_in, g_in, h_in, bse_in)
 
-    # 输出边界的约束
-    # （1/3）CICO中的输出约束
+    # Constraints on the output boundary
+    # （1/3）Output constraints in CICO
     m.addConstr(con_in[0] == 1)
 
     m.update()
 
-    # （2/3）输出边界添加 var=0,con=0 则 g=0的约束
+    # （2/3）Output bounds add the constraint that var=0,con=0 then g=0
     varPcon = {}
     for i in range(2 * l):
         varPcon[i] = m.addVar(lb=0, ub=1, vtype=GRB.BINARY, name="varPcon_out_{}".format(i))
@@ -337,11 +337,11 @@ def gen_Anemoi_model(R, l, numVar):
         m.addConstr(varPcon[i] == var_in[i] + con_in[i])
         m.addConstr((varPcon[i] == 0) >> (g_in[i] == 0))
     m.update()
-    # （3/3） 共有约束
+    # （3/3） communal restraint
     for i in range(2 * l):
         common_constraints(m, var_in[i], con_in[i], deg_in[i])
 
-    # 人为添加约束
+    # Artificially added constraints
     '''
     m.addConstr(m.getVarByName("var_0r_0th_1")==1)
     m.addConstr(m.getVarByName("var_0r_1th_1") == 1)
@@ -353,41 +353,41 @@ def gen_Anemoi_model(R, l, numVar):
     '''
     m.update()
 
-    # 常数个数
+    # Number of constants
     all_con_vars = [var for var in m.getVars() if "con_" in var.VarName[:4]]
-    repeated_con_vars = []  # S盒前后的常数只取一个，把重复的去掉
+    repeated_con_vars = []  # Take only one constant before and after the S-box and remove the duplicates
     for r in range(R):
         for i in range(l):
             repeated_con_vars.append(m.getVarByName("con_{}r_{}th_{}".format(r, i, 13)))
             repeated_con_vars.append(m.getVarByName("con_{}r_{}th_{}".format(r, i, 17)))
             repeated_con_vars.append(m.getVarByName("con_{}r_{}th_{}".format(r, i, 21)))
     sum_cons = sum(all_con_vars) - sum(repeated_con_vars)
-    m.addConstr(sum_cons == 2*l)  # 常数个数等于2*l，则平均有1个解
+    m.addConstr(sum_cons == 2*l)  # The number of constants is equal to 2*l, then on average there is 1 solution
 
-    # 给定变量个数
+    # Given the number of variables
     all_vars = [var for var in m.getVars() if "var_" in var.VarName]
     m.addConstr(sum(all_vars) == numVar)
 
-    # 目标函数
-    # 方程次数之和
+    # objective function
+    # Sum of the number of equations
     all_equs = [var for var in m.getVars() if "equ" in var.VarName]
     obj = m.addVar(vtype=GRB.INTEGER, name="obj")
     m.addConstr(obj == sum(all_equs))
     m.setObjective(obj, GRB.MINIMIZE)
     m.update()
 
-    # 模型设置
-    #m.setParam("TimeLimit", 200)# 设定跑200秒后就停止，输出当前找到的最优解
-    #m.setParam("BestObjStop", 32) #设定目标函数低于100时就停止
+    # Model setup
+    #m.setParam("TimeLimit", 200)# Set the run to stop after 200 seconds and output the currently found optimal solution
+    #m.setParam("BestObjStop", 32) #Set the objective function to stop when it falls below 100
     m.write("Anemoi_CICO_MILP_{}r_{}l_{}v.lp".format(R, l, numVar))
     m.optimize()
     m.write("Anemoi_CICO_MILP_{}r_{}l_{}v.sol".format(R, l, numVar))
     parsing_Anemoi_solution(m, R, l)
-    print("分支数：{}，".format(2*l))
-    print('轮数：{}，'.format(R))
-    print('变量个数：{}，'.format(numVar))
-    print('方程次数之和：{}'.format(obj.X))
-    print('求解复杂度：2 ^ {}'.format(log2(comb(int(obj.X) + 1, numVar) ** 2)))
+    print("Number of branches：{}，".format(2*l))
+    print('round：{}，'.format(R))
+    print('Number of variables：{}，'.format(numVar))
+    print('Sum of the number of equations：{}'.format(obj.X))
+    print('solution complexity：2 ^ {}'.format(log2(comb(int(obj.X) + 1, numVar) ** 2)))
 
 def print_out_vector(m, l, vname):
     print(vname+"_R", end = " ")
@@ -396,7 +396,7 @@ def print_out_vector(m, l, vname):
         print(round(current_var.X), end = " ")
     print()
 def parsing_Anemoi_solution(m, R, l):
-    # 输入变量
+    # input variable
     for r in range(R):
         print('----------r = {}----------'.format(r))
         for i in range(l):
@@ -421,7 +421,7 @@ def parsing_Anemoi_solution(m, R, l):
                 current_var = m.getVarByName(vname + '_{}r_{}th_{}'.format(R, i, j))
                 print(current_var.VarName, ' = ', round(current_var.X))
 
-    # 输出
+    # exports
     print('----------output----------'.format(R))
     print_out_vector(m, l, "var")
     print_out_vector(m, l, "con")
@@ -460,7 +460,7 @@ def print_vc_type(m, r, l, vname, in1, in2, out1, out2):
     print()
 
 def print_dghb_type(m, r, l, vname, in1, in2, out1, out2):
-    # 输入
+    # input
     if r == 0:
         print(vname+'_0r', end=" ")
         for j in range(l):
@@ -476,7 +476,7 @@ def print_dghb_type(m, r, l, vname, in1, in2, out1, out2):
         for j in range(l):
             print(round(m.getVarByName(vname+"_{}r_{}th_{}".format(r, j, in2)).X), end=" ")
     print()
-    # 输出
+    # exports
     print(vname+'_{}r'.format(r), end=" ")
     for j in range(l):
         print(round(m.getVarByName(vname+"_{}r_{}th_{}".format(r, j, out1)).X), end=" ")
@@ -485,10 +485,10 @@ def print_dghb_type(m, r, l, vname, in1, in2, out1, out2):
         print(round(m.getVarByName(vname+"_{}r_{}th_{}".format(r, j, out2)).X), end=" ")
     print()
 def parsing_Anemoi_solution_v0(m, R, l):
-    # 每轮
+    # each round
     for r in range(R):
         print('--------------r = {}-----------------'.format(r))
-        print('-----r = {}-大MDS周围----------------'.format(r))
+        print('-----r = {}-Around the large MDS----------------'.format(r))
         print_vc_type(m, r, l, 'var', 23, 20, 4, 5)
         print_vc_type(m, r, l, 'con', 23, 20, 4,5)
         print_dghb_type(m, r, l, 'deg', 0, 1, 2,3)
