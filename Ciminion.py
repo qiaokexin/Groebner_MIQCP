@@ -411,8 +411,10 @@ def gen_Cinimion_model(R, numVar):
     print('轮数：{}，'.format(R))
     print('变量个数：{}，'.format(numVar))
     print('方程次数之和：{}'.format(obj.X))
-    print('求解复杂度：2 ^ {}'.format(log2(comb(int(obj.X) + 1, numVar) ** 2)))
-    print('用于单变量下：2^{}'.format(univariate_comp(int(obj.X))))
-
+    if numVar == 1:
+        print('单变量下求解复杂度：2^{}'.format(univariate_comp(int(obj.X))))
+    else:
+        print('求解复杂度：2 ^ {}'.format(log2(comb(int(obj.X) + 1, numVar) ** 2)))
+    
 if __name__ == '__main__':
     gen_Cinimion_model(10, 2)
