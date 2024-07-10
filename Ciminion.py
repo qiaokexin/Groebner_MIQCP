@@ -286,18 +286,6 @@ def Cinimion_last_round_model(m, r, in0, in1, in2, in8, in9, in13):
 
     return var_out, con_out, deg_out, g_out
 def parsing_Cinimion_solution(m, R):
-    # 初始轮的输入
-    '''
-    print('-------r = 0 -------------')
-    print('var_0r ', end=" ")
-    for j in range(3):
-        print(round(m.getVarByName("var_0r_{}".format(j)).X), end=" ")
-    print('\ncon_0r ', end=" ")
-    for j in range(3):
-        print(round(m.getVarByName("con_0r_{}".format(j)).X), end=" ")
-        '''
-    # 中间每一轮的中间变量和输出
-    # 最后一轮的中间变量和输出
 
     for var in m.getVars():
         if "var_" in var.VarName[:4]:
