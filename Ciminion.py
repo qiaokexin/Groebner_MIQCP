@@ -12,7 +12,7 @@ def Cinimion_first_round_model(m, var_in, con_in ,deg_in, g_in,h_in, bse_in):
     equ = {}
 
     # Variable Settings
-    # Point positions 0,1,2 are pending quaternions + base binary, directly from the current round of input states
+    # Positions 0,1,2 are pending quaternions + base binary, directly from the current round of input states
     for i in range(3):
         var[i] = var_in[i]
         con[i] = con_in[i]
@@ -20,21 +20,21 @@ def Cinimion_first_round_model(m, var_in, con_in ,deg_in, g_in,h_in, bse_in):
         g[i] = g_in[i]
         h[i] = h_in[i]
         bse[i] = bse_in[i]
-    # The 3rd point position is the base binary + pending quaternion
+    # Position 3 is the base binary + pending quaternion
     var[3], con[3] = gen_branching_vars_vc(m, 0, 3)
     deg[3], g[3], h[3], bse[3] = gen_pending_vars_dghb(m, 0, 3)
-    # Bits 4,5,6,7,8 are pendent quaternions.
+    # Positions 4,5,6,7,8 are pendent quaternions.
     for i in [4,5,6,7,8]:
         deg[i], g[i], h[i], bse[i] = gen_pending_vars_dghb(m, 0, i)
-    # Point 9 is the vce ternary.
+    # Position 9 is the vce ternary.
     var[9], con[9], equ[9] = gen_branching_vars_vce(m, 0, 9)
-    # The 10th point position is the vcde quaternion, named according to the rules of the next round
+    # Position 10 is the vcde quaternion, named according to the rules of the next round
     var[10], con[10], deg[10], equ[10] = gen_branching_vars_vcde(m, 1, 0)
-    # The 11th point position is the vcde quaternion, named according to the rules of the next round
+    # Position 11 is the vcde quaternion, named according to the rules of the next round
     var[11], con[11], deg[11], equ[11] = gen_branching_vars_vcde(m, 1, 1)
-    # The 12th o'clock position is the PENDING quaternion, named according to the next round of rules
+    # Position 12 is the PENDING quaternion, named according to the next round of rules
     deg[12], g[12], h[12], bse[12] = gen_pending_vars_dghb(m, 1, 2)
-    # Point 13 is the pending quaternion, named according to the rules of the next round. 
+    # Position 13 is the pending quaternion, named according to the rules of the next round. 
     deg[13], g[13], h[13], bse[13] = gen_pending_vars_dghb(m, 1, 14)
 
     # Add the equ variable to each arithmetic module
@@ -85,7 +85,7 @@ def Cinimion_first_round_model(m, var_in, con_in ,deg_in, g_in,h_in, bse_in):
     out1 = [var[11], con[11], deg[11], equ[11]]
     # Branch 2 pending quaternion
     out2 = [deg[12], g[12], h[12], bse[12]]
-    # The 8 o'clock position, 9 o'clock position, and 14 o'clock position will also need to be used in the next round and will also need to be returned to the
+    # 8 , 9 , and 14  positions will also need to be used in the next round and will also need to be returned to the
     out8 = [deg[8], g[8], h[8], bse[8]]
     out9 = [var[9], con[9], equ[9]]
     out13 = [deg[13], g[13], h[13], bse[13]]
@@ -103,28 +103,28 @@ def Cinimion_middle_round_model(m, r, in0, in1, in2, in8, in9, in13):
     equ = {}
 
     # Variable Settings
-    # Points 0,1 are vcde quaternions, directly from the current round of input states
+    # Positions 0,1 are vcde quaternions, directly from the current round of input states
     var[0], con[0], deg[0], equ[0] = in0
     var[1], con[1], deg[1], equ[1] = in1
-    # The 2nd point position is the pending quaternion, which comes directly from the current round of input states
+    # Position 2 is the pending quaternion, which comes directly from the current round of input states
     deg[2], g[2], h[2], bse[2] = in2
-    # The 14th point position is the PENDING quaternion, which comes directly from the input
+    # Position 14 is the PENDING quaternion, which comes directly from the input
     deg[14], g[14], h[14], bse[14] = in13
-    # The 3rd point position is the base binary + pending quaternion
+    # Position 3 is the base binary + pending quaternion
     var[3], con[3] = gen_branching_vars_vc(m, r, 3)
     deg[3], g[3], h[3], bse[3] = gen_pending_vars_dghb(m, r, 3)
-    # Points 4,5,6,7,8,10,11 are pending quaternions
+    # Positions 4,5,6,7,8,10,11 are pending quaternions
     for i in [4,5,6,7,8,15]:
         deg[i], g[i], h[i], bse[i] = gen_pending_vars_dghb(m, r, i)
-    # Point 9 is the vce ternary.
+    # Position 9 is the vce ternary.
     var[9], con[9], equ[9] = gen_branching_vars_vce(m, r, 9)
-    # The 10th point position is the vcde quaternion, named according to the rules of the next round
+    # Position 10 is the vcde quaternion, named according to the rules of the next round
     var[10], con[10], deg[10], equ[10] = gen_branching_vars_vcde(m, r+1, 0)
-    # The 11th point position is the vcde quaternion, named according to the rules of the next round
+    # Position 11 is the vcde quaternion, named according to the rules of the next round
     var[11], con[11], deg[11], equ[11] = gen_branching_vars_vcde(m, r+1, 1)
-    # The 12th point position is the PENDING quaternion, named according to the next round of rules
+    # Position 12 is the PENDING quaternion, named according to the next round of rules
     deg[12], g[12], h[12], bse[12] = gen_pending_vars_dghb(m, r+1, 2)
-    # Point 13 is the pending quaternion, named according to the rules of the next round. This was added later
+    # Position 13 is the pending quaternion, named according to the rules of the next round. This was added later
     deg[13], g[13], h[13], bse[13] = gen_pending_vars_dghb(m, r+1, 14)
 
     # Add the equ variable to each arithmetic module
@@ -180,7 +180,7 @@ def Cinimion_middle_round_model(m, r, in0, in1, in2, in8, in9, in13):
     out1 = [var[11], con[11], deg[11], equ[11]]
     # Branch 2 pending quaternion
     out2 = [deg[12], g[12], h[12], bse[12]]
-    # Points 8, 9, and 4 will also need to be used in the next round and returned as well
+    # Positions 8, 9, and 4 will also need to be used in the next round and returned as well
     out8 = [deg[8], g[8], h[8], bse[8]]
     out9 = [var[9], con[9], equ[9]]
     out13 = [deg[13], g[13], h[13], bse[13]]
@@ -198,26 +198,26 @@ def Cinimion_last_round_model(m, r, in0, in1, in2, in8, in9, in13):
     equ = {}
 
     # Variable Settings
-    # Points 0,1 are vcde quaternions, directly from the current round of input states
+    # Positions 0,1 are vcde quaternions, directly from the current round of input states
     var[0], con[0], deg[0], equ[0] = in0
     var[1], con[1], deg[1], equ[1] = in1
-    # The 2nd point position is the pending quaternion, which comes directly from the current round of input states
+    # Position 2 is the pending quaternion, which comes directly from the current round of input states
     deg[2], g[2], h[2], bse[2] = in2
-    # The 14th point position is the PENDING quaternion, which comes directly from the input
+    # Position 14 is the PENDING quaternion, which comes directly from the input
     deg[14], g[14], h[14], bse[14] = in13
-    # The 3rd point position is the base binary + pending quaternion
+    # Position 3 is the base binary + pending quaternion
     var[3], con[3] = gen_branching_vars_vc(m, r, 3)
     deg[3], g[3], h[3], bse[3] = gen_pending_vars_dghb(m, r, 3)
-    # Points 4,5,6,7,8,10,11 are pending quaternions
+    # Positions 4,5,6,7,8,10,11 are pending quaternions
     for i in [4, 5, 6, 7, 8, 15]:
         deg[i], g[i], h[i], bse[i] = gen_pending_vars_dghb(m, r, i)
-    # Addition of base binary at point 8
+    # Addition of base binary at position 8
     var[8], con[8] = gen_branching_vars_vc(m, r, 8)
-    # Point 9 is the vce ternary.
+    # Position 9 is the vce ternary.
     var[9], con[9], equ[9] = gen_branching_vars_vce(m, r, 9)
-    # The 10th point position is the vce triad
+    # Position 10 is the vce triad
     var[10], con[10], equ[10] = gen_branching_vars_vce(m, r, 10)
-    # Points 11, 12 and 13 are not required.
+    # Positions 11, 12 and 13 are not required.
 
     # Add the equ variable to each arithmetic module
     # modules
