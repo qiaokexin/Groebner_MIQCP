@@ -48,7 +48,7 @@ def Griffin4_round_model(R, m, r, t, var_in, con_in ,deg_in, g_in,h_in, bse_in):
     equ = {}
 
     # Variable Settings
-    # Points 0,1,2,3,4,5,6,7 are pendent quaternions + basis binary, directly from the current round of input states
+    # Positions 0,1,2,3,4,5,6,7 are pending quaternions + basis binary, directly from the current round of input states
     for i in range(t):
         var[i] = var_in[i]
         con[i] = con_in[i]
@@ -61,51 +61,51 @@ def Griffin4_round_model(R, m, r, t, var_in, con_in ,deg_in, g_in,h_in, bse_in):
     deg[8], g[8], h[8], bse[8] = gen_pending_vars_dghb(m, r, 8)
     # Position 9 is the vcde tuple
     var[9], con[9], deg[9], equ[9]= gen_branching_vars_vcde(m, r, 9)
-    # The 10th position is the pending quaternion
+    # Position 10 is the pending quaternion
     deg[10], g[10], h[10], bse[10] = gen_pending_vars_dghb(m, r, 10)
-    # The 11th point position is the deg individual variable
+    # Position 11 is the deg individual variable
     deg[11] = gen_vars_d(m, r, 11)
-    # Point 12 is a triad
+    # Position 12 is a triad
     var[12], con[12], deg[12] = gen_branching_vars_vcd(m, r, 12)
     # Position 13 is the vcde tuple
     var[13], con[13] = gen_branching_vars_vc(m, r, 13)
     deg[13], g[13], h[13], bse[13] = gen_pending_vars_dghb(m, r, 13)
-    # The 14th point position is deg individual variables
+    # Position 14 is deg individual variables
     deg[14] = gen_vars_d(m, r, 14)
-    # Point 15 is a triad
+    # Position 15 is a triad
     var[15], con[15], deg[15] = gen_branching_vars_vcd(m, r, 15)
     # Position 16 is the vcde tuple
     var[16], con[16] = gen_branching_vars_vc(m, r, 16)
     deg[16], g[16], h[16], bse[16] = gen_pending_vars_dghb(m, r, 16)
-     # Point 17 is the deg individual variable
+     # Position 17 is the deg individual variable
     deg[17] = gen_vars_d(m, r, 17)
-    # Point 18 is a triad
+    # Position 18 is a triad
     var[18], con[18], deg[18] = gen_branching_vars_vcd(m, r, 18)
-    # The 19th point position is the vcde tuple
+    # Position 19 is the vcde tuple
     var[19], con[19] = gen_branching_vars_vc(m, r, 19)
     deg[19], g[19], h[19], bse[19] = gen_pending_vars_dghb(m, r, 19)
-    #Point 20 is the deg individual variable
+    # Position 20 is the deg individual variable
     deg[20] = gen_vars_d(m, r, 20)
-    # Point 21 is a triad.
+    # Position 21 is a triad.
     var[21], con[21], deg[21] = gen_branching_vars_vcd(m, r, 21)
     # Position 22 is the vcde tuple
     var[22], con[22] = gen_branching_vars_vc(m, r, 22)
     deg[22], g[22], h[22], bse[22] = gen_pending_vars_dghb(m, r, 22)
-    # Point 23 is deg individual variable
+    # Position 23 is deg individual variable
     deg[23] = gen_vars_d(m, r, 23)
-    # Point 24 is a triad
+    # Position 24 is a triad
     var[24], con[24], deg[24] = gen_branching_vars_vcd(m, r, 24)
-    # The 25th point is the vcde tuple
+    # Position 25 is the vcde tuple
     var[25], con[25] = gen_branching_vars_vc(m, r, 25)
     deg[25], g[25], h[25], bse[25] = gen_pending_vars_dghb(m, r, 25)
-    # Point 26 is deg individual variable
+    # Position 26 is deg individual variable
     deg[26] = gen_vars_d(m, r, 26)
-    # Point 27 is the triad
+    # Position 27 is the triad
     var[27], con[27], deg[27] = gen_branching_vars_vcd(m, r, 27)
-    # Point 28 is the vcde tuple
+    # Position 28 is the vcde tuple
     var[28], con[28] = gen_branching_vars_vc(m, r, 28)
     deg[28], g[28], h[28], bse[28] = gen_pending_vars_dghb(m, r, 28)
-    # Add output variable: next round 29,30,31,32,33,34,35,36 points are pending quaternion + base binary
+    # Add output variable: next round 29,30,31,32,33,34,35,36 positions are pending quaternion + base binary
     for i in [29,30,31,32,33,34,35,36]:
         var[i], con[i] = gen_branching_vars_vc(m, r+1, i-29)
         deg[i], g[i], h[i], bse[i] = gen_pending_vars_dghb(m, r+1, i-29)
@@ -131,7 +131,7 @@ def Griffin4_round_model(R, m, r, t, var_in, con_in ,deg_in, g_in,h_in, bse_in):
     m.update()
 
     # Adding constraints to each branch module
-    # 0 pending-up; 1 pending-up(s),同pending-up; 2 pending-up;
+    # 0 pending-up; 1 pending-up(s),same as pending-up; 2 pending-up;
     # 5 pending-up(s),same as pending-up
     for i in [0,1,2,3,4,5,6,8]:
         pending_up(m, var[i], con[i], g[i], deg[i], "{}r_{}".format(r,i))
