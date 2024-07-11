@@ -10,67 +10,67 @@ def Anemoi_round_model(m, r, l, var_in, con_in, deg_in, g_in, h_in, bse_in):
     # Variable Settings
     for i in range(l):
         # Add variables to each branch module
-        # The 0th point position is the pending quaternion + base binary, obtained directly from the input
+        # Position 0 is the pending quaternion + base binary, obtained directly from the input
         var[26 * i + 0] = var_in[i]
         con[26 * i + 0] = con_in[i]
         deg[26 * i + 0] = deg_in[i]
         g[26 * i + 0] = g_in[i]
         h[26 * i + 0] = h_in[i]
         bse[26 * i + 0] = bse_in[i]
-        # The 1st point position is the pending quaternion + the base binary, obtained directly from the input
+        # Position 1 is the pending quaternion + the base binary, obtained directly from the input
         var[26 * i + 1] = var_in[l + i]
         con[26 * i + 1] = con_in[l + i]
         deg[26 * i + 1] = deg_in[l + i]
         g[26 * i + 1] = g_in[l + i]
         h[26 * i + 1] = h_in[l + i]
         bse[26 * i + 1] = bse_in[l + i]
-        # The second point is the pending quaternion
+        # Position 2 is the pending quaternion
         deg[26 * i + 2], g[26 * i + 2], h[26 * i + 2], bse[26 * i + 2] = gen_pending_vars_dghb(m, r, "{}th_{}".format(i,2))
-        # The third point is the pending quaternion
+        # Position 3 is the pending quaternion
         deg[26 * i + 3], g[26 * i + 3], h[26 * i + 3], bse[26 * i + 3] = gen_pending_vars_dghb(m, r, "{}th_{}".format(i,3))
-        # Points 4 and 5 are the var,con,equ triples.
+        # Positions 4 and 5 are the var,con,equ triples.
         var[26 * i + 4], con[26 * i + 4], equ[26 * i + 4] = gen_branching_vars_vce(m, r, "{}th_{}".format(i,4))
         var[26 * i + 5], con[26 * i + 5], equ[26 * i + 5] = gen_branching_vars_vce(m, r, "{}th_{}".format(i,5))
-        # Points 6,7,8,9 are pendent quaternions.
+        # Positions 6,7,8,9 are pendent quaternions.
         for j in range(6, 10):
             deg[26 * i + j], g[26 * i + j], h[26 * i + j], bse[26 * i + j] = gen_pending_vars_dghb(m, r, "{}th_{}".format(i,j))
-        # The 10th point is the var,con,equ triad.
+        # Position 10 is the var,con,equ triad.
         var[26 * i + 10], con[26 * i + 10], equ[26 * i + 10] = gen_branching_vars_vce(m, r, "{}th_{}".format(i,10))
-        # The 11th point is the pending quaternion
+        # Position 11 is the pending quaternion
         deg[26 * i + 11], g[26 * i + 11], h[26 * i + 11], bse[26 * i + 11] = gen_pending_vars_dghb(m, r, "{}th_{}".format(i,11))
-        # The 12th point is the var,con,deg,equ quaternion.
+        # Position 12 is the var,con,deg,equ quaternion.
         var[26 * i + 12], con[26 * i + 12], deg[26 * i + 12], equ[26 * i + 12] = gen_branching_vars_vcde(m, r, "{}th_{}".format(i,12))
-        # The 13th point is the pending quaternion + binary
+        # Position 13 is the pending quaternion + binary
         deg[26 * i + 13], g[26 * i + 13], h[26 * i + 13], bse[26 * i + 13] = gen_pending_vars_dghb(m, r, "{}th_{}".format(i,13))
         var[26 * i + 13], con[26 * i + 13] = gen_branching_vars_vc(m, r, "{}th_{}".format(i,13))
-        # Points 14, 15 are pendant quaternions.
+        # Positions 14, 15 are pendant quaternions.
         deg[26 * i + 14], g[26 * i + 14], h[26 * i + 14], bse[26 * i + 14] = gen_pending_vars_dghb(m, r, "{}th_{}".format(i,14))
         deg[26 * i + 15], g[26 * i + 15], h[26 * i + 15], bse[26 * i + 15] = gen_pending_vars_dghb(m, r, "{}th_{}".format(i,15))
-        # The 16th point is the pending quaternion + binary
+        # Position 16 is the pending quaternion + binary
         deg[26 * i + 16], g[26 * i + 16], h[26 * i + 16], bse[26 * i + 16] = gen_pending_vars_dghb(m, r, "{}th_{}".format(i,16))
         var[26 * i + 16], con[26 * i + 16] = gen_branching_vars_vc(m, r, "{}th_{}".format(i,16))
-        # The 17th point is the var,con,deg,equ quaternion.
+        # Position 17 is the var,con,deg,equ quaternion.
         var[26 * i + 17], con[26 * i + 17], deg[26 * i + 17], equ[26 * i + 17] = gen_branching_vars_vcde(m, r, "{}th_{}".format(i,17))
-        # The 18th and 19th points are pendant quaternions.
+        # Position 18 and 19 are pendant quaternions.
         deg[26 * i + 18], g[26 * i + 18], h[26 * i + 18], bse[26 * i + 18] = gen_pending_vars_dghb(m, r, "{}th_{}".format(i,18))
         deg[26 * i + 19], g[26 * i + 19], h[26 * i + 19], bse[26 * i + 19] = gen_pending_vars_dghb(m, r, "{}th_{}".format(i,19))
-        # The 20th point is the var,con,deg,equ quaternion, but where var, con are named according to the next round of indicators
+        # Position 20 is the var,con,deg,equ quaternion, but where var, con are named according to the next round of indicators
         deg[26 * i + 20] = m.addVar(lb = 0, vtype = GRB.INTEGER, name = "deg_{}r_{}th_{}".format(r, i, 20))
         equ[26 * i + 20] = m.addVar(lb = 0, vtype = GRB.INTEGER, name = "equ_{}r_{}th_{}".format(r, i, 20))
         var[26 * i + 20], con[26 * i + 20] = gen_branching_vars_vc(m, r + 1, "{}th_{}".format(i, 1))
-        # The 21st point is pending quaternion + binary
+        # Position 21 is pending quaternion + binary
         deg[26 * i + 21], g[26 * i + 21], h[26 * i + 21], bse[26 * i + 21] = gen_pending_vars_dghb(m, r, "{}th_{}".format(i,21))
         var[26 * i + 21], con[26 * i + 21] = gen_branching_vars_vc(m, r, "{}th_{}".format(i,21))
-        # The 22nd point is the pending quaternion.
+        # Position 22 is the pending quaternion.
         deg[26 * i + 22], g[26 * i + 22], h[26 * i + 22], bse[26 * i + 22] = gen_pending_vars_dghb(m, r,
                                                                                                    "{}th_{}".format(i,
                                                                                                                     22))
-        # The 23rd point is the equ+vc binary, where the vc binary is named according to the next round of indicators
+        # Position 23 is the equ+vc binary, where the vc binary is named according to the next round of indicators
         equ[26 * i + 23] = m.addVar(lb=0, vtype=GRB.INTEGER, name="equ_{}r_{}th_{}".format(r, i, 23))
         var[26 * i + 23], con[26 * i + 23] = gen_branching_vars_vc(m, r + 1, "{}th_{}".format(i, 0))
 
 
-        # Points 24 and 25 are the inputs for the next round. Pending quaternions, named according to the next round's corners.
+        # Positions 24 and 25 are the inputs for the next round. Pending quaternions, named according to the next round's corners.
         deg[26 * i + 24], g[26 * i + 24], h[26 * i + 24], bse[26 * i + 24] = gen_pending_vars_dghb(m, r+1, "{}th_{}".format(i,0))
         deg[26 * i + 25], g[26 * i + 25], h[26 * i + 25], bse[26 * i + 25] = gen_pending_vars_dghb(m, r + 1,
                                                                                                    "{}th_{}".format(i,1))
@@ -120,7 +120,7 @@ def Anemoi_round_model(m, r, l, var_in, con_in, deg_in, g_in, h_in, bse_in):
 
 
         # Adding constraints to each branch module
-        # 6,7,8,9 小MDS
+        # 6,7,8,9 samll MDS
         MDS_module(m, 2, [var[26 * i + 4], var[26 * i + 5], var[26 * i + 10], var[26 * i + 12]],\
                    [con[26 * i + 4], con[26 * i + 5], con[26 * i + 10], con[26 * i + 12]],
                    [deg[26 * i + 6], deg[26 * i + 7], deg[26 * i + 8], deg[26 * i + 9]],\
