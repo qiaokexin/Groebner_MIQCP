@@ -14,7 +14,7 @@ def univariate_comp(d):
     return log2(d * log2(d) * (log2(d) + 64) * log2(log2(d)))
 
     
-def gen_pending_vars_dghb(m, r, i): # generate variable quadruple for pending ends
+def gen_pending_vars_dghb(m, r, i): # generate deg, g, h, bse variables for pending ends
     deg = m.addVar(lb = 0, vtype = GRB.INTEGER, name = "deg_{}r_{}".format(r, i))
     g = m.addVar(lb = 0, ub = 1, vtype = GRB.BINARY, name = "g_{}r_{}".format(r, i))
     h = m.addVar(lb = 0, ub = 1, vtype = GRB.BINARY, name = "h_{}r_{}".format(r, i))
@@ -108,9 +108,9 @@ def MDS_module(m, t, var, con, deg, g, h, bse, equ, index): # constraints for MD
     m.addConstrs(h[i] == g[i] - bse[i] for i in range(2*t))
     # There are t branches in the base
     m.addConstr(sum(bse[i] for i in range(2 * t)) == t)
-    # The number of branches not selected into the base should be greater than or equal to the number of base
+    # The degree of branches not selected into the base should be bigger than or equal to the number of base
     m.addConstrs((h[i] == 1) >> (max_bseTdeg <= deg[i]) for i in range(2*t))
-    # Sum of the number of equations added
+    # The sum of the degrees of the added equations
     m.addLConstr(equ == sum(hTdeg[i] for i in range(2*t)))
     # if a branch is not determined, it should be expressed by basis
     m.addConstrs((g[i] == 0) >> (deg[i] == max_bseTdeg) for i in range(2*t))
@@ -164,9 +164,9 @@ def taddition_module(m, t, var, con, deg, g, h, bse, equ, index): # Defining t-a
     m.addConstrs(h[i] == g[i] - bse[i] for i in range(t))
     # There are t-1 branches in the base
     m.addConstr(sum(bse[i] for i in range(t)) == t-1)
-    # The number of branches not selected into the base should be greater than or equal to the number of base 
+    # The degree of branches not selected into the base should be bigger than or equal to the number of base 
     m.addConstrs((h[i] == 1) >> (max_bseTdeg <= deg[i]) for i in range(t))
-    # Sum of the number of equations added
+    # Sum of the degrees of equations added
     m.addConstr(equ == sum(hTdeg[i] for i in range(t)))
     # if a branch is not determined, it should be expressed by basis
     m.addConstrs((g[i] == 0) >> (deg[i] == max_bseTdeg) for i in range(t))
