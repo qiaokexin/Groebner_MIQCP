@@ -48,7 +48,7 @@ def Griffin4_round_model(R, m, r, t, var_in, con_in ,deg_in, g_in,h_in, bse_in):
     equ = {}
 
     # Variable Settings
-    # Point positions 0,1,2,3 are PENDING quaternions + base binary, directly from the current round of input states
+    # Positions 0,1,2,3 are PENDING quaternions + base binary, directly from the current round of input states
     for i in range(t):
         var[i] = var_in[i]
         con[i] = con_in[i]
@@ -58,26 +58,26 @@ def Griffin4_round_model(R, m, r, t, var_in, con_in ,deg_in, g_in,h_in, bse_in):
         bse[i] = bse_in[i]
     # Position 4 is the vcde tuple
     var[4], con[4], deg[4], equ[4]= gen_branching_vars_vcde(m, r, 4)
-    # The 5th point position is the base binary + pending quaternion
+    # Position 5 is the base binary + pending quaternion
     var[5], con[5] = gen_branching_vars_vc(m, r, 5)
     deg[5], g[5], h[5], bse[5] = gen_pending_vars_dghb(m, r, 5)
-    # The 6th point position is deg individual variables
+    # Position 6 is deg individual variables
     deg[6] = gen_vars_d(m, r, 6)
-    # Point 7 is a triad
+    # Position 7 is a triad
     var[7], con[7], deg[7] = gen_branching_vars_vcd(m, r, 7)
     # Position 8 is the pending quaternion + base binary
     var[8], con[8] = gen_branching_vars_vc(m, r, 8)
     deg[8], g[8], h[8], bse[8] = gen_pending_vars_dghb(m, r, 8)
-    # Point 9 is the deg individual variable
+    # Position 9 is the deg individual variable
     deg[9] = gen_vars_d(m, r, 9)
-    # Point 10 is a triad
+    # Position 10 is a triad
     var[10], con[10], deg[10] = gen_branching_vars_vcd(m, r, 10)
-    # The 11th point position is the pending quaternion + base binary
+    # Position 11 is the pending quaternion + base binary
     var[11], con[11] = gen_branching_vars_vc(m, r, 11)
     deg[11], g[11], h[11],bse[11] = gen_pending_vars_dghb(m, r, 11)
     # Position 12 is the PENDING quaternion
     deg[12], g[12], h[12], bse[12] = gen_pending_vars_dghb(m, r, 12)
-    # Add output variable: next round 13th, 14th, 15th, 16th point position is pending quaternion + base binary
+    # Add output variable: next round 13th, 14th, 15th, 16th positions are pending quaternion + base binary
     for i in [13,14,15,16]:
         var[i], con[i] = gen_branching_vars_vc(m, r+1, i-13)
         deg[i], g[i], h[i], bse[i] = gen_pending_vars_dghb(m, r+1, i-13)
@@ -95,8 +95,8 @@ def Griffin4_round_model(R, m, r, t, var_in, con_in ,deg_in, g_in,h_in, bse_in):
     m.update()
 
     # Adding constraints to each branch module
-    # 0 pending-up; 1 pending-up(s),同pending-up; 2 pending-up;
-    # 5 pending-up(s),同pending-up
+    # 0 pending-up; 1 pending-up(s),same as pending-up; 2 pending-up;
+    # 5 pending-up(s),same as pending-up
     for i in [0, 1, 2, 5]:
         pending_up(m, var[i], con[i], g[i], deg[i], "{}r_{}".format(r,i))
     # 3 down-pending; 8 down-pending; 11 down-pending
